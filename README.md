@@ -1,6 +1,9 @@
 # simulateAmputation.m
 Code to simulate amputation in terms of surface geometry creation for socket design based on finite element analysis.
 
+# Dependencies
+The codes provided here required [GIBBON](https://github.com/gibbonCode/GIBBON).
+
 ## Description
 ### Pre-processing
 #### Leg isolation
