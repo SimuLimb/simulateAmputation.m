@@ -111,9 +111,9 @@ optionStructRemesh.disp_on=1; <span class="comment">% Turn off command window te
 [Fn,Vn]=ggremesh(Fa,Va,optionStructRemesh);
 </pre><pre class="codeoutput"> 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-------&gt;  Geogram/vorpalite for resmeshing  &lt;------ 01-Sep-2021 17:26:26
-# Export mesh input file.                          01-Sep-2021 17:26:26
-# Run Geomgram/vorpalite.                          01-Sep-2021 17:26:26
+------&gt;  Geogram/vorpalite for resmeshing  &lt;------ 01-Sep-2021 17:42:02
+# Export mesh input file.                          01-Sep-2021 17:42:02
+# Run Geomgram/vorpalite.                          01-Sep-2021 17:42:02
  ______________________________________________________________________________ 
 |                                                                              |
 | o-[config      ] Configuration file name:geogram.ini                         |
@@ -137,11 +137,11 @@ optionStructRemesh.disp_on=1; <span class="comment">% Turn off command window te
    _______________________
  _/ =====[remeshing]===== \____________________________________________________
 |                                                                              |
-||| o-[Newton      ] Elapsed time: 1.32s                                         |
+||| o-[Newton      ] Elapsed time: 1.29s                                         |
 | o-[Remesh      ] Computing RVD...                                            |
 | o-[Validate    ] (FP64) nb_v:22222 nb_e:0 nb_f:44440 nb_b:0 tri:1 dim:3      |
 |                  Attributes on vertices: point[3]                            |
-| o-[Remesh      ] Elapsed time: 1.65 s                                        |
+| o-[Remesh      ] Elapsed time: 1.64 s                                        |
    ____________________________
  _/ =====[postprocessing]===== \_______________________________________________
 |                                                                              |
@@ -159,11 +159,11 @@ optionStructRemesh.disp_on=1; <span class="comment">% Turn off command window te
 |                  Attributes on vertices: point[3]                            |
 | o-[I/O         ] Saving file /mnt/data/MATLAB/GIBBON/data/temp/temp_out.obj. |
 |                  ..                                                          |
-| o-[Total time  ] Elapsed time: 3.74 s                                        |
+| o-[Total time  ] Elapsed time: 3.73 s                                        |
 \______________________________________________________________________________/
-# Importing remeshed geometry.                     01-Sep-2021 17:26:30
-# Removing temporary files.                        01-Sep-2021 17:26:31
-# Done!                                            01-Sep-2021 17:26:31
+# Importing remeshed geometry.                     01-Sep-2021 17:42:06
+# Removing temporary files.                        01-Sep-2021 17:42:07
+# Done!                                            01-Sep-2021 17:42:07
 </pre><h2 id="9">Visualisation</h2><pre class="codeinput">cFigure;
 subplot(1,2,1); hold <span class="string">on</span>;
 gpatch(F,V,<span class="string">'w'</span>,<span class="string">'none'</span>,0.25);
@@ -185,7 +185,7 @@ modelNew.cutHeight=cutHeight;
     saveName_mat=fullfile(saveFolder,[saveNameMesh,<span class="string">'.mat'</span>]);
     save(saveName_mat,<span class="string">'-struct'</span>,<span class="string">'modelNew'</span>)
 <span class="keyword">end</span>
-</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+</pre><p><i><b>SimuLimb footer text</b></i></p><p>License: <a href="https://github.com/SimuLimb/simulateAmputation.m/blob/main/LICENSE">https://github.com/SimuLimb/simulateAmputation.m/blob/main/LICENSE</a> Copyright (C) 2006-2021 Kevin Mattheus Moerman and the SimuLimb contributors</p><p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p><pre>   http://www.apache.org/licenses/LICENSE-2.0</pre><p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 clear; close all; clc; 
 
@@ -289,5 +289,22 @@ if saveOn==1
     save(saveName_mat,'-struct','modelNew')
 end
 
+%% 
+% _*SimuLimb footer text*_ 
+% 
+% License: <https://github.com/SimuLimb/simulateAmputation.m/blob/main/LICENSE>
+% Copyright (C) 2006-2021 Kevin Mattheus Moerman and the SimuLimb contributors
+% 
+% Licensed under the Apache License, Version 2.0 (the "License");
+% you may not use this file except in compliance with the License.
+% You may obtain a copy of the License at
+% 
+%     http://www.apache.org/licenses/LICENSE-2.0
+% 
+% Unless required by applicable law or agreed to in writing, software
+% distributed under the License is distributed on an "AS IS" BASIS,
+% WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+% See the License for the specific language governing permissions and
+% limitations under the License.
 ##### SOURCE END #####
 --></body></html>
