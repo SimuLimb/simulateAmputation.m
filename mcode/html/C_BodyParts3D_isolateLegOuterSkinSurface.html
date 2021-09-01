@@ -1,0 +1,293 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>C_BodyParts3D_isolateLegOuterSkinSurface</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-01"><meta name="DC.source" content="C_BodyParts3D_isolateLegOuterSkinSurface.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Description</a></li><li><a href="#3">Plotting settings</a></li><li><a href="#4">Control parameters</a></li><li><a href="#7">Construct alpha shape</a></li><li><a href="#8">Remesh alpha shape using <tt>ggremesh</tt></a></li><li><a href="#9">Visualisation</a></li><li><a href="#10">Store model in structure</a></li><li><a href="#11">Save model</a></li></ul></div><pre class="codeinput">clear; close <span class="string">all</span>; clc;
+</pre><h2 id="2">Description</h2><p>This code processes the MAT file for the skin surface (found in the /mat folder), since it contains both the inner and outer skin surfaces. The inner surface is removed and the outer surface is processed to produce a single "water tight" mesh. The surface is also remeshed using ggremesh. The remeshed surface is exported to the /post folder.</p><p>This code requires the GIBBON MATLAB toolbox <a href="www.gibboncode.org">www.gibboncode.org</a></p><h2 id="3">Plotting settings</h2><pre class="codeinput">lineWidth=0.5;
+</pre><h2 id="4">Control parameters</h2><pre class="codeinput"><span class="comment">% Path names</span>
+projectFolder = fileparts(fileparts(mfilename(<span class="string">'fullpath'</span>))); <span class="comment">%Main code path</span>
+loadFolder=fullfile(projectFolder,<span class="string">'data'</span>,<span class="string">'BodyParts3D'</span>,<span class="string">'mat'</span>); <span class="comment">%The MAT loading folder</span>
+saveFolder=fullfile(projectFolder,<span class="string">'data'</span>,<span class="string">'BodyParts3D'</span>,<span class="string">'post'</span>); <span class="comment">%The MAT saving folder for processed data</span>
+
+fileName_FMA=<span class="string">'FMA7163'</span>;
+saveNameMesh=<span class="string">'skin_leg_right'</span>;
+
+pointSpacing=4;
+cutHeight=675;
+saveOn=1;
+</pre><pre class="codeinput">fileName_mat=fullfile(loadFolder,[fileName_FMA,<span class="string">'.mat'</span>]);
+
+model=load(fileName_mat);
+F=model.faces;
+V=model.vertices;
+</pre><pre class="codeinput">logicVertices=V(:,1)&lt;0 &amp; V(:,3)&lt;=cutHeight+mean(patchEdgeLengths(F,V));
+logicFaces=any(logicVertices(F),2);
+logicFaces=triSurfLogicSharpFix(F,logicFaces);
+Fs=F(logicFaces,:);
+[Fs,Vs]=patchCleanUnused(Fs,V);
+
+optionStruct.outputType=<span class="string">'label'</span>;
+[G,~,groupSize]=tesgroup(Fs,optionStruct);
+[~,indMax]=max(groupSize);
+logicKeep=G==indMax;
+Fs=Fs(logicKeep,:);
+[Fs,Vs]=patchCleanUnused(Fs,Vs);
+
+snapTolerance=mean(patchEdgeLengths(Fs,Vs))/100;
+n=vecnormalize([0 0 1]); <span class="comment">%Normal direction to plane</span>
+P=[0 0 cutHeight]; <span class="comment">%Point on plane</span>
+[Fc,Vc,~,logicSide]=triSurfSlice(Fs,Vs,[],P,n,snapTolerance);
+[Fc,Vc]=patchCleanUnused(Fc(logicSide,:),Vc);
+</pre><h2 id="7">Construct alpha shape</h2><p>This deteriorates surface quality (bridges concave regions) but is a termporary "quick-and-dirty" work-around to obtain outer skin surface only.</p><pre class="codeinput">shp = alphaShape(Vc,max(patchEdgeLengths(Fc,Vc)),<span class="string">'HoleThreshold'</span>,500,<span class="string">'RegionThreshold'</span>,1);
+[Fa,Va] = boundaryFacets(shp); <span class="comment">%Get boundary faces of alpha shape</span>
+[Fa,Va] = patchCleanUnused(Fa,Va); <span class="comment">%Remove unused vertices</span>
+</pre><h2 id="8">Remesh alpha shape using <tt>ggremesh</tt></h2><pre class="codeinput">optionStructRemesh.pointSpacing=pointSpacing; <span class="comment">%Set desired point spacing</span>
+optionStructRemesh.disp_on=1; <span class="comment">% Turn off command window text display</span>
+[Fn,Vn]=ggremesh(Fa,Va,optionStructRemesh);
+</pre><pre class="codeoutput"> 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+------&gt;  Geogram/vorpalite for resmeshing  &lt;------ 01-Sep-2021 17:26:26
+# Export mesh input file.                          01-Sep-2021 17:26:26
+# Run Geomgram/vorpalite.                          01-Sep-2021 17:26:26
+ ______________________________________________________________________________ 
+|                                                                              |
+| o-[config      ] Configuration file name:geogram.ini                         |
+|                  Home directory:/root                                        |
+| o-[I/O         ] Output = /mnt/data/MATLAB/GIBBON/data/temp/temp_out.obj     |
+|                  Loading file /mnt/data/MATLAB/GIBBON/data/temp/temp.obj...  |
+|                  (FP64) nb_v:9054 nb_e:0 nb_f:18104 nb_b:0 tri:1 dim:3       |
+|                  Attributes on vertices: point[3]                            |
+| o-[Load        ] Elapsed time: 0.01 s                                        |
+   ___________________________
+ _/ =====[preprocessing]===== \________________________________________________
+|                                                                              |
+| o-[CmdLine     ] using pre:epsilon=0(0%)                                     |
+|                  using pre:min_comp_area=9236.76(3%)                         |
+| o-[Components  ] Nb connected components=1                                   |
+|                  Mesh does not have small connected component (good)         |
+| o-[CmdLine     ] using pre:max_hole_area=100                                 |
+| o-[Validate    ] Mesh does not have 0-area facets (good)                     |
+| o-[CmdLine     ] using pre:margin=0(0%)                                      |
+| o-[Pre         ] Elapsed time: 0.01 s                                        |
+   _______________________
+ _/ =====[remeshing]===== \____________________________________________________
+|                                                                              |
+||| o-[Newton      ] Elapsed time: 1.32s                                         |
+| o-[Remesh      ] Computing RVD...                                            |
+| o-[Validate    ] (FP64) nb_v:22222 nb_e:0 nb_f:44440 nb_b:0 tri:1 dim:3      |
+|                  Attributes on vertices: point[3]                            |
+| o-[Remesh      ] Elapsed time: 1.65 s                                        |
+   ____________________________
+ _/ =====[postprocessing]===== \_______________________________________________
+|                                                                              |
+| o-[CmdLine     ] using post:min_comp_area=9163.64(3%)                        |
+| o-[Components  ] Nb connected components=1                                   |
+|                  Mesh does not have small connected component (good)         |
+| o-[CmdLine     ] using post:max_hole_area=100                                |
+|                  using post:max_deg3_dist=0.754369(0.10000000000000001%)     |
+| o-[Degree3     ] Does not have any degree 3 vertex (good)                    |
+| o-[Post        ] Elapsed time: 0 s                                           |
+   ____________________
+ _/ =====[result]===== \_______________________________________________________
+|                                                                              |
+| o-[FinalMesh   ] (FP64) nb_v:22222 nb_e:0 nb_f:44440 nb_b:0 tri:1 dim:3      |
+|                  Attributes on vertices: point[3]                            |
+| o-[I/O         ] Saving file /mnt/data/MATLAB/GIBBON/data/temp/temp_out.obj. |
+|                  ..                                                          |
+| o-[Total time  ] Elapsed time: 3.74 s                                        |
+\______________________________________________________________________________/
+# Importing remeshed geometry.                     01-Sep-2021 17:26:30
+# Removing temporary files.                        01-Sep-2021 17:26:31
+# Done!                                            01-Sep-2021 17:26:31
+</pre><h2 id="9">Visualisation</h2><pre class="codeinput">cFigure;
+subplot(1,2,1); hold <span class="string">on</span>;
+gpatch(F,V,<span class="string">'w'</span>,<span class="string">'none'</span>,0.25);
+gpatch(Fn,Vn,<span class="string">'bw'</span>,<span class="string">'none'</span>);
+axisGeom;
+camlight <span class="string">headlight</span>;
+
+subplot(1,2,2); hold <span class="string">on</span>;
+gpatch(Fn,Vn,<span class="string">'bw'</span>,<span class="string">'k'</span>,1,lineWidth);
+axisGeom;
+camlight <span class="string">headlight</span>;
+gdrawnow;
+</pre><img vspace="5" hspace="5" src="C_BodyParts3D_isolateLegOuterSkinSurface_01.png" alt=""> <h2 id="10">Store model in structure</h2><pre class="codeinput">modelNew.source=fileName_FMA;
+modelNew.faces=Fn;
+modelNew.vertices=Vn;
+modelNew.pointSpacing=pointSpacing;
+modelNew.cutHeight=cutHeight;
+</pre><h2 id="11">Save model</h2><pre class="codeinput"><span class="keyword">if</span> saveOn==1
+    saveName_mat=fullfile(saveFolder,[saveNameMesh,<span class="string">'.mat'</span>]);
+    save(saveName_mat,<span class="string">'-struct'</span>,<span class="string">'modelNew'</span>)
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear; close all; clc; 
+
+%% Description 
+% This code processes the MAT file for the skin surface (found in the /mat
+% folder), since it contains both the inner and outer skin surfaces. The
+% inner surface is removed and the outer surface is processed to produce a
+% single "water tight" mesh. The surface is also remeshed using ggremesh.
+% The remeshed surface is exported to the /post folder. 
+%
+% This code requires the GIBBON MATLAB toolbox 
+% <www.gibboncode.org>
+
+%% Plotting settings
+lineWidth=0.5;
+
+%% Control parameters
+
+% Path names
+projectFolder = fileparts(fileparts(mfilename('fullpath'))); %Main code path
+loadFolder=fullfile(projectFolder,'data','BodyParts3D','mat'); %The MAT loading folder
+saveFolder=fullfile(projectFolder,'data','BodyParts3D','post'); %The MAT saving folder for processed data
+
+fileName_FMA='FMA7163';
+saveNameMesh='skin_leg_right';
+
+pointSpacing=4; 
+cutHeight=675;
+saveOn=1;
+
+%%
+
+fileName_mat=fullfile(loadFolder,[fileName_FMA,'.mat']);
+
+model=load(fileName_mat);
+F=model.faces;
+V=model.vertices;
+        
+%%
+
+logicVertices=V(:,1)<0 & V(:,3)<=cutHeight+mean(patchEdgeLengths(F,V));
+logicFaces=any(logicVertices(F),2);
+logicFaces=triSurfLogicSharpFix(F,logicFaces); 
+Fs=F(logicFaces,:); 
+[Fs,Vs]=patchCleanUnused(Fs,V);
+
+optionStruct.outputType='label';
+[G,~,groupSize]=tesgroup(Fs,optionStruct);
+[~,indMax]=max(groupSize);
+logicKeep=G==indMax;
+Fs=Fs(logicKeep,:); 
+[Fs,Vs]=patchCleanUnused(Fs,Vs);
+
+snapTolerance=mean(patchEdgeLengths(Fs,Vs))/100; 
+n=vecnormalize([0 0 1]); %Normal direction to plane
+P=[0 0 cutHeight]; %Point on plane
+[Fc,Vc,~,logicSide]=triSurfSlice(Fs,Vs,[],P,n,snapTolerance);
+[Fc,Vc]=patchCleanUnused(Fc(logicSide,:),Vc);
+
+%% Construct alpha shape
+% This deteriorates surface quality (bridges concave regions) but is a
+% termporary "quick-and-dirty" work-around to obtain outer skin surface
+% only. 
+
+shp = alphaShape(Vc,max(patchEdgeLengths(Fc,Vc)),'HoleThreshold',500,'RegionThreshold',1);
+[Fa,Va] = boundaryFacets(shp); %Get boundary faces of alpha shape
+[Fa,Va] = patchCleanUnused(Fa,Va); %Remove unused vertices
+
+%% Remesh alpha shape using |ggremesh|
+optionStructRemesh.pointSpacing=pointSpacing; %Set desired point spacing
+optionStructRemesh.disp_on=1; % Turn off command window text display
+[Fn,Vn]=ggremesh(Fa,Va,optionStructRemesh);
+
+%% Visualisation
+
+cFigure; 
+subplot(1,2,1); hold on; 
+gpatch(F,V,'w','none',0.25);
+gpatch(Fn,Vn,'bw','none');
+axisGeom; 
+camlight headlight; 
+
+subplot(1,2,2); hold on; 
+gpatch(Fn,Vn,'bw','k',1,lineWidth);
+axisGeom; 
+camlight headlight; 
+gdrawnow; 
+
+%% Store model in structure
+
+modelNew.source=fileName_FMA;
+modelNew.faces=Fn;
+modelNew.vertices=Vn;
+modelNew.pointSpacing=pointSpacing; 
+modelNew.cutHeight=cutHeight;
+
+%% Save model
+
+if saveOn==1
+    saveName_mat=fullfile(saveFolder,[saveNameMesh,'.mat']);
+    save(saveName_mat,'-struct','modelNew')
+end
+
+##### SOURCE END #####
+--></body></html>

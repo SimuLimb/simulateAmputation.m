@@ -1,0 +1,204 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>A_BodyParts3D_convert_STL_to_MAT</title><meta name="generator" content="MATLAB 9.10"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2021-09-01"><meta name="DC.source" content="A_BodyParts3D_convert_STL_to_MAT.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Description</a></li><li><a href="#3">Control parameters</a></li></ul></div><pre class="codeinput">clear; close <span class="string">all</span>; clc;
+</pre><h2 id="2">Description</h2><p>This code parses all STL files in the /stl folder and exports them as MAT files to the /mat folder.</p><p>This code requires the GIBBON MATLAB toolbox <a href="www.gibboncode.org">www.gibboncode.org</a></p><h2 id="3">Control parameters</h2><pre class="codeinput"><span class="comment">% Path names</span>
+projectFolder = fileparts(fileparts(mfilename(<span class="string">'fullpath'</span>))); <span class="comment">%Main code path</span>
+loadFolder=fullfile(projectFolder,<span class="string">'data'</span>,<span class="string">'BodyParts3D'</span>,<span class="string">'stl'</span>); <span class="comment">%The STL loading folder</span>
+saveFolder=fullfile(projectFolder,<span class="string">'data'</span>,<span class="string">'BodyParts3D'</span>,<span class="string">'mat'</span>); <span class="comment">%The MAT saving folder</span>
+</pre><pre class="codeinput"><span class="comment">%Get list of all STL files</span>
+fileList = dir(fullfile(loadFolder,[<span class="string">'*'</span>,<span class="string">'stl'</span>]));
+fileList={fileList(1:end).name};
+
+Dc=readtable(fullfile(projectFolder,<span class="string">'data'</span>,<span class="string">'BodyParts3D'</span>,<span class="string">'FMA_ID_label_obj.csv'</span>));
+P=lower(Dc.FMAID);
+
+<span class="comment">%Convert all STL files to MAT</span>
+numFiles=numel(fileList); <span class="comment">%Number of files to parse</span>
+<span class="keyword">for</span> q=1:1:numFiles <span class="comment">%Loop over all files</span>
+    <span class="comment">%Get file name</span>
+    [~,fileNameClean,~]=fileparts(fileList{q}); <span class="comment">%File name without path or extension</span>
+
+    <span class="comment">%Prepare STL file name</span>
+    fileNameLoad=fullfile(loadFolder,fileList{q}); <span class="comment">%STL file name</span>
+
+    <span class="comment">%Prepare save file name</span>
+    fileNameSave=fullfile(saveFolder,[fileNameClean,<span class="string">'.mat'</span>]); <span class="comment">%MAT file name</span>
+
+    <span class="comment">%Get FMAID code</span>
+    FMAID=sscanf(fileNameClean,<span class="string">'FMA%d'</span>);
+
+    <span class="comment">%Get preferred name</span>
+    logicFMAID=P==FMAID;
+    preferredName=Dc.preferredName{logicFMAID};
+
+    <span class="comment">%Parse STL import</span>
+    disp([<span class="string">'Parsing file '</span>, num2str(q),<span class="string">' of '</span>,num2str(numFiles),<span class="string">', '</span>,sprintf(<span class="string">'%3.0f'</span>,round(100*q/numFiles)),<span class="string">'% done, '</span>,fileNameClean,<span class="string">', '</span>,preferredName])
+    <span class="keyword">try</span> <span class="comment">%MATLAB's stlread</span>
+        TR = stlread(fileNameLoad);
+        v=TR.Points;
+        f=TR.ConnectivityList;
+    <span class="keyword">catch</span> <span class="comment">%GIBBON's importer</span>
+        [stlStruct] = import_STL_bin(fileNameLoad);
+        v=stlStruct.solidVertices{1};
+        f=stlStruct.solidFaces{1};
+    <span class="keyword">end</span>
+
+    <span class="comment">%Merge vertices</span>
+    [f,v]=mergeVertices(f,v);
+
+    <span class="comment">%Build model structure</span>
+    model.sourceName=fileList{q};
+    model.preferredName=preferredName;
+    model.faces=f;
+    model.vertices=v;
+
+    <span class="comment">%Export MAT file</span>
+    save(fileNameSave,<span class="string">'-struct'</span>,<span class="string">'model'</span>);
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">Parsing file 1 of 6,  17% done, FMA16586, Right hip bone
+Parsing file 2 of 6,  33% done, FMA24474, Right femur
+Parsing file 3 of 6,  50% done, FMA24477, Right tibia
+Parsing file 4 of 6,  67% done, FMA24480, Right fibula
+Parsing file 5 of 6,  83% done, FMA24486, Right patella
+Parsing file 6 of 6, 100% done, FMA7163, Skin
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clear; close all; clc;
+
+%% Description
+% This code parses all STL files in the /stl folder and exports them as MAT
+% files to the /mat folder.
+%
+% This code requires the GIBBON MATLAB toolbox
+% <www.gibboncode.org>
+
+%% Control parameters
+
+% Path names
+projectFolder = fileparts(fileparts(mfilename('fullpath'))); %Main code path
+loadFolder=fullfile(projectFolder,'data','BodyParts3D','stl'); %The STL loading folder
+saveFolder=fullfile(projectFolder,'data','BodyParts3D','mat'); %The MAT saving folder
+
+%%
+
+%Get list of all STL files
+fileList = dir(fullfile(loadFolder,['*','stl']));
+fileList={fileList(1:end).name};
+
+Dc=readtable(fullfile(projectFolder,'data','BodyParts3D','FMA_ID_label_obj.csv'));
+P=lower(Dc.FMAID);
+
+%Convert all STL files to MAT
+numFiles=numel(fileList); %Number of files to parse
+for q=1:1:numFiles %Loop over all files
+    %Get file name
+    [~,fileNameClean,~]=fileparts(fileList{q}); %File name without path or extension
+    
+    %Prepare STL file name
+    fileNameLoad=fullfile(loadFolder,fileList{q}); %STL file name
+    
+    %Prepare save file name
+    fileNameSave=fullfile(saveFolder,[fileNameClean,'.mat']); %MAT file name
+    
+    %Get FMAID code
+    FMAID=sscanf(fileNameClean,'FMA%d');
+    
+    %Get preferred name
+    logicFMAID=P==FMAID;
+    preferredName=Dc.preferredName{logicFMAID};
+    
+    %Parse STL import
+    disp(['Parsing file ', num2str(q),' of ',num2str(numFiles),', ',sprintf('%3.0f',round(100*q/numFiles)),'% done, ',fileNameClean,', ',preferredName])    
+    try %MATLAB's stlread
+        TR = stlread(fileNameLoad);
+        v=TR.Points;
+        f=TR.ConnectivityList;
+    catch %GIBBON's importer
+        [stlStruct] = import_STL_bin(fileNameLoad);
+        v=stlStruct.solidVertices{1};
+        f=stlStruct.solidFaces{1};
+    end
+    
+    %Merge vertices
+    [f,v]=mergeVertices(f,v);
+    
+    %Build model structure
+    model.sourceName=fileList{q};
+    model.preferredName=preferredName;
+    model.faces=f;
+    model.vertices=v;
+    
+    %Export MAT file
+    save(fileNameSave,'-struct','model');    
+end
+
+
+##### SOURCE END #####
+--></body></html>
