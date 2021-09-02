@@ -129,7 +129,7 @@ D=abs(D);
 D=D./max(D); 
 D=D.^2;
 
-[Dp,indMin]=minDist(Vs(:,[1 2]),Vt(indBt,:));
+[Dp,indMin]=minDist(Vs(:,[1 2]),Vt(indBt,[1 2]));
 Dp(Dp<=taperThreshold)=taperThreshold;
 Dp=Dp-min(Dp);
 Dp=Dp./max(Dp);
