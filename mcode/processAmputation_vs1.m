@@ -16,7 +16,7 @@ loadFolder=fullfile(projectFolder,'data','BodyParts3D','post');
 saveFolder_stl=fullfile(projectFolder,'data','BodyParts3D','post_stl'); 
 saveFolder=loadFolder; 
 saveNameGeom='BodyParts3D_right_leg_transtibial_amp';
-select_amputation_case='tf';%'tt';'tf' % where the trans-tibial(tt); trans-femoral (tf)
+select_amputation_case='tt';%'tt';'tf' % where the trans-tibial(tt); trans-femoral (tf)
 
 switch select_amputation_case
      case 'tf'
@@ -254,19 +254,6 @@ plotV(P_end,'k.','MarkerSize',25);
 axisGeom; camlight headlight; 
 gdrawnow; 
 
-%%
-% % Visualization 
-% 
-% cFigure; hold on; 
-% title('Distal end closure');
-% 
-% hp=gpatch(Fsb,Vsb,Vsb(:,3),'k',1); hp.FaceColor='interp';
-% % gpatch(Ebs,Vs,'none','b',1,3);
-% 
-% axisGeom; camlight headlight; 
-% gdrawnow; 
-% 
-% dfasfa
 
 %% Merge skin components and remesh 
 pointSpacing=mean(patchEdgeLengths(Fs,Vs));
@@ -568,7 +555,7 @@ switch select_amputation_case
 %         colormap gjet; icolorbar;
 %         gdrawnow; 
             
-        %% Cut the top skin surface
+        %% Cut the top muscles surface
         %fileNames={'right_femur','right_tibia','right_fibula','right_patella','right_leg_skin','right_leg_muscles'};
         Fm=FT_amp{6};
         Vm=VT_amp{6};
@@ -603,7 +590,6 @@ switch select_amputation_case
         
         %Use triSurfSlice to process cut
         snapTolerance=mean(patchEdgeLengths(Ff,Vf))/100;
-        P=[0 0 cutLevelNow]; %Point on plane
         [Fc,Vc,~,logicSide]=triSurfSlice(Ff,Vf,[],P,-nCut,snapTolerance);
         [Fc,Vc]=patchCleanUnused(Fc(~logicSide,:),Vc); %Clean-up mesh
         
@@ -640,7 +626,8 @@ switch select_amputation_case
         axisGeom; camlight headlight;
         gdrawnow;
         %%
-        FT_amp{1}=fliplr(Fc_femur); %invert femur normals
+        %FT_amp{1}=fliplr(Fc_femur); %invert femur normals
+        FT_amp{1}=Fc_femur; %invert femur normals
         VT_amp{1}=Vc_femur;
         CT_amp{1}=1*ones(size(Fc_femur,1),1);
         
@@ -665,10 +652,8 @@ switch select_amputation_case
         Fs=FT_amp{5};
         Vs=VT_amp{5};
         
-        cutLevelNow=max(Vs(:,3))-topCropOffset_tf;
         %Use triSurfSlice to process cut
         snapTolerance=mean(patchEdgeLengths(Fs,Vs))/100;
-        
         P=[0 0 cutLevelNow]; %Point on plane
         [Fc,Vc,~,logicSide]=triSurfSlice(Fs,Vs,[],P,-nCut,snapTolerance);
         [Fc,Vc]=patchCleanUnused(Fc(~logicSide,:),Vc); %Clean-up mesh
@@ -691,17 +676,9 @@ switch select_amputation_case
         
         
         %Get the surface of the muscle
-        Fm=FT_amp{6};
-        Vm=VT_amp{6};
-        
-        %Use triSurfSlice to process cut
-        snapTolerance=mean(patchEdgeLengths(Fm,Vm))/100;
-        P=[0 0 cutLevelNow]; %Point on plane
-        [Fc,Vc,~,logicSide]=triSurfSlice(Fm,Vm,[],P,-nCut,snapTolerance);
-        [Fc,Vc]=patchCleanUnused(Fc(~logicSide,:),Vc); %Clean-up mesh
- 
-        Fc_muscle=Fc;
-        Vc_muscle=Vc;
+        Fc_muscle=FT_amp{6};
+        Vc_muscle=VT_amp{6};
+
         Ebs_muscle=patchBoundary(Fc_muscle,Vc_muscle);
         indBs_muscle=edgeListToCurve(Ebs_muscle);
         indBs_muscle=indBs_muscle(1:end-1);
@@ -719,7 +696,7 @@ switch select_amputation_case
         %%
         cFigure;
         gpatch(Fc_skin,Vc_skin,'gw','k',1);
-        gpatch(Fm,Vm,'rw','k',1);
+        gpatch(Fc_muscle,Vc_muscle,'rw','k',1);
         gpatch(Fsm,Vsm,'bw','k',0.6);
         colormap gjet;
         axisGeom; camlight headlight;
@@ -738,12 +715,10 @@ switch select_amputation_case
         %%
         cFigure; hold on;
         gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-        % patchNormPlot(FT_amp,VT_amp);
+        patchNormPlot(FT_amp{1},VT_amp{1});
         axisGeom; camlight headlight;
         colormap gjet; icolorbar;
         gdrawnow;  
-       
-
         
         case 'tf'
         %fileNames={'right_femur','right_leg_skin','right_leg_muscles'};
@@ -781,25 +756,22 @@ switch select_amputation_case
         
         %Use triSurfSlice to process cut
         snapTolerance=mean(patchEdgeLengths(Ff,Vf))/100;
-        P=[0 0 cutLevelNow]; %Point on plane
+        %P=[0 0 cutLevelNow]; %Point on plane
         [Fc,Vc,~,logicSide]=triSurfSlice(Ff,Vf,[],P,-nCut,snapTolerance);
         [Fc,Vc]=patchCleanUnused(Fc(~logicSide,:),Vc); %Clean-up mesh
         
-%         % Remesh using ggremesh
-%         optionStruct3.pointSpacing=mean(patchEdgeLengths(Ff,Vf));
-%         optionStruct3.disp_on=0; % Turn off command window text display
-%         optionStruct3.pre.max_hole_area=100; %Max hole area for pre-processing step
-%         optionStruct3.pre.max_hole_edges=0; %Max number of hole edges for pre-processing step
+        % Remesh using ggremesh
+        optionStruct3.pointSpacing=mean(patchEdgeLengths(Ff,Vf));
+        optionStruct3.disp_on=0; % Turn off command window text display
+        optionStruct3.pre.max_hole_area=100; %Max hole area for pre-processing step
+        optionStruct3.pre.max_hole_edges=0; %Max number of hole edges for pre-processing step
         
-%        [Fc_femur,Vc_femur]=ggremesh(Fc,Vc,optionStruct3);
-        Fc_femur=Fc;
-        Vc_femur=Vc;
+        [Fc_femur,Vc_femur]=ggremesh(Fc,Vc,optionStruct3);
         Ebs_femur=patchBoundary(Fc_femur,Vc_femur);
         indBs_femur=edgeListToCurve(Ebs_femur);
         indBs_femur=indBs_femur(1:end-1);
         
         %%
-        
         z=0.5*(mean(Vc_femur(indBs_femur,3))+mean(Vc_femur(indBs_femur,3)));
         
         Vc_muscle(indBs_muscle,3)=z;%muscle
@@ -808,7 +780,6 @@ switch select_amputation_case
         %%
         pointSpacing=mean(patchEdgeLengths(Fc_muscle,Vc_muscle));
         [Ftt,Vtt]=regionTriMesh3D({Vc_muscle(indBs_muscle,:),Vc_femur(indBs_femur,:)},pointSpacing,0,'linear');
-        
         
         %%
         cFigure;
@@ -835,16 +806,13 @@ switch select_amputation_case
         axisGeom; camlight headlight;
         colormap gjet; icolorbar;
         gdrawnow;  
-        
+       
         %Cut the top skin surface
         Fs=FT_amp{2};
         Vs=VT_amp{2};
         
-        cutLevelNow=max(Vs(:,3))-topCropOffset_tf;
         %Use triSurfSlice to process cut
         snapTolerance=mean(patchEdgeLengths(Fs,Vs))/100;
-        
-        P=[0 0 cutLevelNow]; %Point on plane
         [Fc,Vc,~,logicSide]=triSurfSlice(Fs,Vs,[],P,-nCut,snapTolerance);
         [Fc,Vc]=patchCleanUnused(Fc(~logicSide,:),Vc); %Clean-up mesh
         
@@ -853,7 +821,6 @@ switch select_amputation_case
         optionStruct3.disp_on=0; % Turn off command window text display
         optionStruct3.pre.max_hole_area=100; %Max hole area for pre-processing step
         optionStruct3.pre.max_hole_edges=0; %Max number of hole edges for pre-processing step
-        
         [Fc,Vc]=ggremesh(Fc,Vc,optionStruct3);
         
         Ebs=patchBoundary(Fc,Vc);
@@ -864,23 +831,14 @@ switch select_amputation_case
         Vc_skin=Vc;
         indBs_skin=indBs;
         
-        
         %Get the surface of the muscle
-        Fm=FT_amp{3};
-        Vm=VT_amp{3};
-        
-        %Use triSurfSlice to process cut
-        snapTolerance=mean(patchEdgeLengths(Fm,Vm))/100;
-        P=[0 0 cutLevelNow]; %Point on plane
-        [Fc,Vc,~,logicSide]=triSurfSlice(Fm,Vm,[],P,-nCut,snapTolerance);
-        [Fc,Vc]=patchCleanUnused(Fc(~logicSide,:),Vc); %Clean-up mesh
+        Fc_muscle=FT_amp{3};
+        Vc_muscle=VT_amp{3};
 
-        Fc_muscle=Fc;
-        Vc_muscle=Vc;
-        Ebs_muscle=patchBoundary(Fc_muscle,Vc_muscle);
-        indBs_muscle=edgeListToCurve(Ebs_muscle);
+        Ebm=patchBoundary(Fc_muscle,Vc_muscle);
+        indBs_muscle=edgeListToCurve(Ebm);
         indBs_muscle=indBs_muscle(1:end-1);
-        
+
         %%
         z=0.5*(mean(Vc_muscle(indBs_muscle,3))+mean(Vc_muscle(indBs_muscle,3)));
         
@@ -892,17 +850,20 @@ switch select_amputation_case
         [Fsm,Vsm]=regionTriMesh3D({Vc_skin(indBs_skin,:),Vc_muscle(indBs_muscle,:)},pointSpacing,0,'linear');
         
         %%
-        cFigure;
+        cFigure;hold on;
         gpatch(Fc_skin,Vc_skin,'gw','k',1);
-        gpatch(Fm,Vm,'rw','k',1);
+        gpatch(Fc_muscle,Vc_muscle,'rw','k',1);
         gpatch(Fsm,Vsm,'bw','k',0.6);
+        plotV(Vc_skin(indBs_skin,:),'r-','LineWidth',4);
+        plotV(Vc_muscle(indBs_muscle,:),'g-','LineWidth',4);
+
         colormap gjet;
         axisGeom; camlight headlight;
         gdrawnow;
-        
+
         
         %%
-        FT_amp{2}=Fc_skin;
+        FT_amp{2}=fliplr(Fc_skin);
         VT_amp{2}=Vc_skin;
         CT_amp{2}=2*ones(size(Fc_skin,1),1);
         
@@ -913,11 +874,16 @@ switch select_amputation_case
         %%
         cFigure; hold on;
         gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-        % patchNormPlot(FT_amp,VT_amp);
+        patchNormPlot(FT_amp,VT_amp);
         axisGeom; camlight headlight;
         colormap gjet; icolorbar;
         gdrawnow;  
-       
+
+%         stlwrite(triangulation(VT_amp{1},FT_amp{1}),fullfile(saveFolder_stl,'femur_tf.stl'),'binary');
+%         stlwrite(triangulation(VT_amp{2},FT_amp{2}),fullfile(saveFolder_stl,'skin_tf.stl'),'binary');
+%         stlwrite(triangulation(VT_amp{3},FT_amp{3}),fullfile(saveFolder_stl,'muscle_tf.stl'),'binary');
+%         stlwrite(triangulation(VT_amp{4},FT_amp{4}),fullfile(saveFolder_stl,'muscle_lid_tf.stl'),'binary');
+%         stlwrite(triangulation(VT_amp{5},FT_amp{5}),fullfile(saveFolder_stl,'skin_lid_tf.stl'),'binary'); 
         stlStruct.solidNames={'Femur'};
         stlStruct.solidVertices={VT_amp{1}};
         stlStruct.solidFaces={FT_amp{1}};
@@ -945,7 +911,6 @@ switch select_amputation_case
         stlStruct.solidNormals={[]};
         fileName=fullfile(saveFolder_stl,'muscle_lid_tf.stl');
         export_STL_txt(fileName,stlStruct);
-        
         
         stlStruct.solidNames={'Skin_lid'};
         stlStruct.solidVertices={VT_amp{5}};
