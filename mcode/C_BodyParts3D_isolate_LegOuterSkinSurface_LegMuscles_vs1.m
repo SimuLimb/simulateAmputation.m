@@ -30,7 +30,7 @@ cutHeight=810;
 saveOn=1;
 
 
-Select_layer='outer_muscles_surface';%'outer_skin_surface';'outer_muscles_surface'
+Select_layer='outer_skin_surface';%'outer_skin_surface';'outer_muscles_surface'
 switch Select_layer
     case 'outer_skin_surface'
         %% Original
@@ -187,7 +187,7 @@ switch Select_layer
         drawnow;
 
         snapTolerance=mean(patchEdgeLengths(Fe,Ve))/100;
-        numLoftGuideSlicesFat=41;
+        numLoftGuideSlicesFat=60;
         n=vecnormalize([0 0 1]);
         numPoints=200;
         %Find lowest and highest point on the skin
@@ -195,19 +195,19 @@ switch Select_layer
         [~,indMin]=min(Ve(:,3));
         P=Ve(indMax,:);
         PA=Ve(indMin,:);
-        P(:,3)=P(:,3)-110;
+        P(:,3)=P(:,3)-113;
         P0=P;
         PA(:,3)=PA(:,3)+110;
         zz=linspacen(P(:,3),PA(:,3),numLoftGuideSlicesFat);
         e=[(1:numPoints)' [(2:numPoints)';1]];
-        VC=cell(numLoftGuideSlicesFat-4,1);
+        VC=cell(numLoftGuideSlicesFat,1);
         
         q=1;
         P=Ve(indMax,:);
         P(:,3)=P(:,3)-6;
         [Ff,Vf,~,logicSide,Eb]=triSurfSlice(Fe,Ve,[],P,n,snapTolerance);
         groupStruct.outputType='label';
-        [G,~,groupSize]=tesgroup(Eb,groupStruct);
+        [G,~,groupSize]=tesgroup(Eb,groupStruct);         
         [~,indKeep]=max(groupSize);
         indKeep=2;
         logicKeep=G==indKeep;
@@ -218,79 +218,71 @@ switch Select_layer
         VC{q}=V_slice_curve;
         FL=[];
         VL=V_slice_curve;
-        
           
         [Fh,Vh]=regionTriMesh3D({VL},[],0,'linear');
         Fh=fliplr(Fh);
         
-        %%
-        for q=2:1:numLoftGuideSlicesFat-4
-            P(:,3)=zz(q);
-            if (q==20)
-                P(:,3)=zz(q)+6;
-            end
+        
+        cFigure;hold on;
+        gpatch(Ff(logicSide,:),Vf,'w','none',1);
+        gpatch(Ff(~logicSide,:),Vf,'w','none',0.25);
+        gpatch(Eb,Vf,'none','b',1,3);
+        plotV(VL,'r-','LineWidth',4);
+        axisGeom; axis manual; camlight headligth;
+        set(gca,'FontSize',25);
+        gdrawnow;
+
+        for i=2:1:numLoftGuideSlicesFat
+            P(:,3)=zz(i);
             [Ff,Vf,~,logicSide,Eb]=triSurfSlice(Fe,Ve,[],P,n,snapTolerance);
             groupStruct.outputType='label';
             [G,~,groupSize]=tesgroup(Eb,groupStruct);
-            
-            if (q==2 | q==3 | q==5 | q==6 |q==7 | q==13 | q==15 | q==16 | q==18 | q==19| q==20)
-                [~,indKeep]=max(groupSize);
+
+            VT={};
+            for q=1:1:max(size(groupSize))
+                logicKeep=G==q;
+                Eb_keep=Eb(logicKeep,:);
+                indCurveNow=edgeListToCurve(Eb_keep);
+                VT{q}=Vf(indCurveNow',:);
+                Xmin(q)=min(VT{q}(:,1));
             end
-            if (q==4 | q==8 | q==9 | q==10 | q==11 | q==12 | q==14 | q==17 | q==22 | q==24 | q==25 | q==27 ...
-                | q==28 | q==30 | q==31 | q==33 | q==34 | q==36 | q==37)
-                indKeep=2;
+
+            [Xmin_value,indOut]=min(Xmin);
+            count=1;
+            VTT={};
+            for q=1:1:max(size(groupSize))
+                if q~=indOut
+                    indKeep=q;
+                    logicKeep=G==indKeep;
+                    Eb_keep=Eb(logicKeep,:);
+                    indCurveNow=edgeListToCurve(Eb_keep);
+                    VTT{count}=Vf(indCurveNow,:);
+                    count=count+1;
+                end
             end
-            if (q==23)
-                indKeep=4;
+        
+            V_points_keep=[];
+            for q=1:1:max(size(VTT))
+                Vpp=VTT{q};
+                V_points_keep=[V_points_keep;Vpp];
             end
-            if (q==26 | q==29 | q==35)
-                indKeep=3;
-            end
-            if (q==32)
-                indKeep=1;
-            end
-            
-            
-            if (q==21)
-                indKeep1=2;
-                indKeep2=3;
-                indKeep3=4;
-                logicKeep1=G==indKeep1;
-                logicKeep2=G==indKeep2;
-                logicKeep3=G==indKeep3;
-                Eb_keep1=Eb(logicKeep1,:);
-                Eb_keep2=Eb(logicKeep2,:);
-                Eb_keep3=Eb(logicKeep3,:);
-                indCurveNow1=edgeListToCurve(Eb_keep1);
-                indCurveNow2=edgeListToCurve(Eb_keep2);
-                indCurveNow3=edgeListToCurve(Eb_keep3);
-                VT=[Vf(indCurveNow1,:);Vf(indCurveNow2,:);Vf(indCurveNow3,:);];
-            end
-            
-            if (q~=21)
-            logicKeep=G==indKeep;
-            Eb_keep=Eb(logicKeep,:);
-            indCurveNow=edgeListToCurve(Eb_keep);
-            VT=Vf(indCurveNow,:);
-            end
-            
-            [V_slice_curve]=convexhull_curve(VT,numPoints);
-            f=[e+(q-2)*numPoints fliplr(e)+(q-1)*numPoints];
+
+            [V_slice_curve]=convexhull_curve(V_points_keep,numPoints);
+            f=[e+(i-2)*numPoints fliplr(e)+(i-1)*numPoints];
             
             
             FL=[FL;f];
             VL=[VL;V_slice_curve];
-            VC{q}=V_slice_curve;
+            VC{i}=V_slice_curve;
             
-            cFigure;hold on;
-            gpatch(Ff(logicSide,:),Vf,'w','none',1);
-            gpatch(Ff(~logicSide,:),Vf,'w','none',0.25);
-            gpatch(Eb,Vf,'none','b',1,3);
-            plotV(VL,'r-','LineWidth',4);
-            axisGeom; axis manual; camlight headligth;
-            set(gca,'FontSize',25);
-            gdrawnow;
-
+%             cFigure;hold on;
+%             gpatch(Ff(logicSide,:),Vf,'w','none',1);
+%             gpatch(Ff(~logicSide,:),Vf,'w','none',0.25);
+%             gpatch(Eb,Vf,'none','b',1,3);
+%             plotV(VL,'r-','LineWidth',4);
+%             axisGeom; axis manual; camlight headligth;
+%             set(gca,'FontSize',25);
+%             gdrawnow;
         end
 
         [Fg,Vg]=regionTriMesh3D({V_slice_curve},[],0,'linear');
@@ -358,16 +350,20 @@ switch Select_layer
         cPar1.n=5; %Number of iterations
         [V_muscles_smoothed]=patchSmooth(F_muscles,V_muscles,[],cPar1);
     
+        %% Remesh
+        optionStructRemesh.pointSpacing=4; %Set desired point spacing
+        [Fn,Vn]=ggremesh(F_muscles,V_muscles_smoothed,optionStructRemesh);
+    
         cFigure;hold on;
-        gpatch(F_muscles,V_muscles_smoothed,'w','k',1);
+        gpatch(Fn,Vn,'w','k',1);
         axisGeom; axis manual; camlight headligth;
         set(gca,'FontSize',25);
         gdrawnow;
 
         %% Store model in structure
         modelNew.source=fileName_FMA_refined;
-        modelNew.faces=F_muscles;
-        modelNew.vertices=V_muscles;
+        modelNew.faces=Fn;
+        modelNew.vertices=Vn;
         modelNew.pointSpacing=pointSpacing;
         modelNew.cutHeight=cutHeight;
         
