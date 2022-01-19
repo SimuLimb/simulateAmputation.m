@@ -30,7 +30,7 @@ cutHeight=810;
 saveOn=1;
 
 
-Select_layer='outer_skin_surface';%'outer_skin_surface';'outer_muscles_surface'
+Select_layer='outer_muscles_surface';%'outer_skin_surface';'outer_muscles_surface'
 switch Select_layer
     case 'outer_skin_surface'
         %% Original
@@ -87,7 +87,7 @@ switch Select_layer
         gpatch(F,V,'w','none',0.25);
         gpatch(Fe,Ve,'rw','none',1);
         plotV(V_slice_curve,'k-','LineWidth',4);
-        
+        axis off;
         axisGeom;
         camlight headlight;
         drawnow;
@@ -113,11 +113,13 @@ switch Select_layer
         subplot(1,2,1); hold on;
         gpatch(F,V,'w','none',0.25);
         gpatch(Fn,Vn,'bw','none');
+        axis off;
         axisGeom;
         camlight headlight;
         
         subplot(1,2,2); hold on;
         gpatch(Fn,Vn,'bw','k',1,lineWidth);
+        axis off;
         axisGeom;
         camlight headlight;
         gdrawnow;
@@ -207,18 +209,43 @@ switch Select_layer
         P(:,3)=P(:,3)-6;
         [Ff,Vf,~,logicSide,Eb]=triSurfSlice(Fe,Ve,[],P,n,snapTolerance);
         groupStruct.outputType='label';
-        [G,~,groupSize]=tesgroup(Eb,groupStruct);         
-        [~,indKeep]=max(groupSize);
-        indKeep=2;
-        logicKeep=G==indKeep;
-        Eb_keep=Eb(logicKeep,:);
-        indCurveNow=edgeListToCurve(Eb_keep);
-        VT=Vf(indCurveNow,:);
-        [V_slice_curve]=convexhull_curve(VT,numPoints);
+        [G,~,groupSize]=tesgroup(Eb,groupStruct); 
+        for i=1:size(groupSize,2)
+            logicKeep=G==i;
+            Eb_keep=Eb(logicKeep,:);
+            indCurveNow=edgeListToCurve(Eb_keep);
+            VT=Vf(indCurveNow,:);
+            [V_slice_curve]=convexhull_curve(VT,numPoints);
+            Vcc{i}=V_slice_curve;
+        end
+%         
+%         %first_min_value
+%         for i=1:size(groupSize,2)
+%             [val(i),idx(i)] = min([Vcc{i}(:,1)]);   
+%         end
+%         [~,idx_a]=min(val(:));
+%         Vcc{idx_a} = NaN;
+%         %second_min_value
+%         for i=1:size(Vcc,2)
+%             [val(i),idx(i)] = min([Vcc{i}(:,1)]);   
+%         end
+%         [~,idx_a]=min(val(:));
+%         Vcc{idx_a} = NaN;
+%         %third_min_value
+%         for i=1:size(Vcc,2)
+%             [val(i),idx(i)] = min([Vcc{i}(:,1)]);   
+%         end
+%         [~,idx_a]=min(val(:));
+        idx_a=3;
+        V_slice_curve=Vcc{idx_a};
         VC{q}=V_slice_curve;
         FL=[];
         VL=V_slice_curve;
-          
+        [~,indStart]=max(VL(:,1));
+        if indStart>1
+            VL=[VL(indStart:end,:); VL(1:indStart-1,:)];
+        end
+
         [Fh,Vh]=regionTriMesh3D({VL},[],0,'linear');
         Fh=fliplr(Fh);
         
@@ -226,9 +253,10 @@ switch Select_layer
         cFigure;hold on;
         gpatch(Ff(logicSide,:),Vf,'w','none',1);
         gpatch(Ff(~logicSide,:),Vf,'w','none',0.25);
+        %gpatch(Fh,Vh,'w','k',0.25);
         gpatch(Eb,Vf,'none','b',1,3);
-        plotV(VL,'r-','LineWidth',4);
-        axisGeom; axis manual; camlight headligth;
+        plotV(VL,'k-','LineWidth',4);
+        axisGeom; axis off;axis manual; camlight headligth;
         set(gca,'FontSize',25);
         gdrawnow;
 
@@ -237,6 +265,16 @@ switch Select_layer
             [Ff,Vf,~,logicSide,Eb]=triSurfSlice(Fe,Ve,[],P,n,snapTolerance);
             groupStruct.outputType='label';
             [G,~,groupSize]=tesgroup(Eb,groupStruct);
+
+            
+            for q=1:1:max(size(groupSize))
+            logicKeep=G==q;
+            Eb_keep=Eb(logicKeep,:);
+            indCurveNow=edgeListToCurve(Eb_keep);
+            VT=Vf(indCurveNow,:);
+            [V_slice_curve]=convexhull_curve(VT,numPoints);
+            Vcc{i}=V_slice_curve;
+            end
 
             VT={};
             for q=1:1:max(size(groupSize))
@@ -272,7 +310,7 @@ switch Select_layer
             
             
             FL=[FL;f];
-            VL=[VL;V_slice_curve];
+            VL=[VL;V_slice_curve;];
             VC{i}=V_slice_curve;
             
 %             cFigure;hold on;
@@ -280,7 +318,7 @@ switch Select_layer
 %             gpatch(Ff(~logicSide,:),Vf,'w','none',0.25);
 %             gpatch(Eb,Vf,'none','b',1,3);
 %             plotV(VL,'r-','LineWidth',4);
-%             axisGeom; axis manual; camlight headligth;
+%             axisGeom; axis off;axis manual; camlight headligth;
 %             set(gca,'FontSize',25);
 %             gdrawnow;
         end
@@ -290,21 +328,27 @@ switch Select_layer
         if dot(ne,[0 0 1])>0
             Fg=fliplr(Fg);
         end
-        
+       
+        %VL0=VL;
         [FL,VL]=subQuad(FL,VL,3,3);
+        %[FL,VL]=subQuadCatmullClark(FL,VL,2,1);
         [FL,VL]=quad2tri(FL,VL,'a');
         FL=fliplr(FL);
         
         cFigure;
         subplot(1,2,1); hold on;
-        gpatch(Fe,Ve,'rw','none',1);
-        axisGeom;
+        %gpatch(Fe,Ve,'rw','none',1);
+        gpatch(Ff(logicSide,:),Vf,'w','none',1);
+        gpatch(Ff(~logicSide,:),Vf,'w','none',0.25);
+        %gpatch(Eb,Vf,'none','b',1,3);
+        plotV(VL,'k-','LineWidth',4);
+        axisGeom;axis off;
         camlight headligth;
         set(gca,'FontSize',25);
         
         subplot(1,2,2); hold on;
-        plotV(P0,'g.','MarkerSize',30);
-        plotV(PA,'g.','MarkerSize',30);
+        %plotV(P0,'g.','MarkerSize',30);
+        %plotV(PA,'g.','MarkerSize',30);
         gpatch(Fg,Vg,'w','k',1);
         %patchNormPlot(Fg,Vg);
         
@@ -313,26 +357,24 @@ switch Select_layer
         
         gpatch(FL,VL,'bw','k',1);
         %patchNormPlot(FL,VL);
-        
         gpatch(Ff,Vf,'w','none',0.25);
-        
-        
+        %plotV(VL0,'k-','LineWidth',4);
         nn=size(VC);
         for q=1:1:nn(1)
             Vpp=VC{q};
             plotV(Vpp([1:size(Vpp,1) 1],:),'k-','LineWidth',4);
         end
         
-        axisGeom; axis manual; camlight headligth;
+        axisGeom; axis off;axis manual; camlight headligth;
         set(gca,'FontSize',25);
         gdrawnow;
-        
+
         % Join and merge surfaces
         [F_muscles,V_muscles,C_muscles]=joinElementSets({Fg,FL,Fh},{Vg,VL,Vh});
         [F_muscles,V_muscles]=mergeVertices(F_muscles,V_muscles);
         
         cFigure; hold on;
-        title('Completed skin+fat surface');
+        %title('Completed skin+fat surface');
         gpatch(Ff,Vf,'w','none',0.5);
         gpatch(F_muscles,V_muscles,C_muscles,'none',1);
 
@@ -355,11 +397,12 @@ switch Select_layer
         [Fn,Vn]=ggremesh(F_muscles,V_muscles_smoothed,optionStructRemesh);
     
         cFigure;hold on;
-        gpatch(Fn,Vn,'w','k',1);
-        axisGeom; axis manual; camlight headligth;
+        gpatch(Fe,Ve,'w','none',1);
+        gpatch(Fn,Vn,'r','k',1);
+        axisGeom; axis off; axis manual; camlight headligth;
         set(gca,'FontSize',25);
         gdrawnow;
-
+        
         %% Store model in structure
         modelNew.source=fileName_FMA_refined;
         modelNew.faces=Fn;
