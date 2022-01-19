@@ -15,8 +15,9 @@ projectFolder = fileparts(fileparts(mfilename('fullpath')));
 loadFolder=fullfile(projectFolder,'data','BodyParts3D','post'); 
 saveFolder_stl=fullfile(projectFolder,'data','BodyParts3D','post_stl'); 
 saveFolder=loadFolder; 
-saveNameGeom='BodyParts3D_right_leg_transtibial_amp';
-select_amputation_case='tt';%'tt';'tf' % where the trans-tibial(tt); trans-femoral (tf)
+saveNameGeom_tt='BodyParts3D_right_leg_transtibial_amp';
+saveNameGeom_tf='BodyParts3D_right_leg_transfemoral_amp';
+select_amputation_case='tf';%'tt';'tf' % where the trans-tibial(tt); trans-femoral (tf)
 
 switch select_amputation_case
      case 'tf'
@@ -25,7 +26,7 @@ switch select_amputation_case
         fileNames={'right_femur','right_tibia','right_fibula','right_patella','right_leg_skin','right_leg_muscles'};
 end
     
-saveOn=0;
+saveOn=1;
 
 %The percentage for trans-femoral (above knee) amputation
 amputationPercentageFemur=25;
@@ -73,12 +74,11 @@ end
 % Visualize surface and landmarks
 cFigure; hold on; 
 gpatch(FT,VT,CT,'none',0.5);
-axisGeom; camlight headlight; 
+axisGeom; axis off;camlight headlight; 
 colormap gjet; icolorbar; 
 gdrawnow; 
 
-
-%% Compute landmarks for tt amputation
+%% Compute landmarks for tf amputation
 switch select_amputation_case
     case 'tf'
         %% Compute the femur length for tf amputation
@@ -91,10 +91,10 @@ switch select_amputation_case
         %%
         % Visualize surface and landmarks
         cFigure; hold on;
-        gpatch(FT,VT,CT,'none',0.5);
-        plotV(V_bone_femur(I_min_femur,:),'k.','MarkerSize',35);
-        axisGeom; camlight headlight;
-        colormap gjet; icolorbar;
+        gpatch(FT,VT,CT,'none',0.25);
+        plotV(V_bone_femur(I_min_femur,:),'k.','MarkerSize',50);
+        axisGeom; axis off; camlight headlight;
+        colormap gjet; %icolorbar;
         gdrawnow;
 
     case 'tt'
@@ -103,10 +103,10 @@ switch select_amputation_case
         %%
         % Visualize surface and landmarks
         cFigure; hold on;
-        gpatch(FT,VT,CT,'none',0.5);
-        plotV(P_patella_centroid,'k.','MarkerSize',35);
-        axisGeom; camlight headlight;
-        colormap gjet; icolorbar;
+        gpatch(FT,VT,CT,'none',0.25);
+        plotV(P_patella_centroid,'k.','MarkerSize',50);
+        axisGeom; axis off;camlight headlight;
+        colormap gjet; %icolorbar;
         gdrawnow;
 end
 
@@ -146,11 +146,11 @@ end
 % Visualization
 
 cFigure; hold on; 
-title('Cut features');
+%title('Cut features');
 % gpatch(FT,VT,'w','none',0.1);
 gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-axisGeom; camlight headlight; 
-colormap gjet; icolorbar; 
+axisGeom; axis off; camlight headlight; 
+colormap gjet; %icolorbar; 
 gdrawnow; 
 
 %% Set up skin taper parameterisation
@@ -236,7 +236,7 @@ Ebs=patchBoundary(Fs,Vs);
 cFigure; hold on; 
 title('Distal end closure');
 gpatch(FT_amp,VT_amp,'w','none',1);
-gpatch(Fs,Vs,'w','none',0.25);
+%gpatch(Fs,Vs,'w','none',0.25);
 hp=gpatch(Fsb,Vsb,Vsb(:,3),'none',1); hp.FaceColor='interp';
 % gpatch(Ebs,Vs,'none','b',1,3);
 
@@ -251,7 +251,7 @@ end
 
 plotV(P_end,'k.','MarkerSize',25);
 
-axisGeom; camlight headlight; 
+axisGeom; axis off; camlight headlight; 
 gdrawnow; 
 
 
@@ -282,12 +282,12 @@ cFigure;
 subplot(1,2,1); hold on; 
 % gpatch(FT,VT,'w','none',0.25);
 gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-axisGeom; camlight headlight; 
-colormap gjet; icolorbar; 
+axisGeom; axis off; camlight headlight; 
+colormap gjet; %icolorbar; 
 
 subplot(1,2,2); hold on; 
 gpatch(FT_amp,VT_amp,'w','k',1);
-axisGeom; camlight headlight; 
+axisGeom; axis off; camlight headlight; 
 gdrawnow; 
 
 
@@ -385,12 +385,12 @@ cFigure;
 subplot(1,2,1); hold on; 
 % gpatch(FT,VT,'w','none',0.25);
 gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-axisGeom; camlight headlight; 
-colormap gjet; icolorbar; 
+axisGeom; axis off; camlight headlight; 
+colormap gjet; %icolorbar; 
 
 subplot(1,2,2); hold on; 
 gpatch(FT_amp,VT_amp,'w','k',0.5);
-axisGeom; camlight headlight; 
+axisGeom; axis off; camlight headlight; 
 gdrawnow; 
 
 %% Process femur taper
@@ -462,8 +462,8 @@ cFigure;
 subplot(1,2,1); hold on; 
 % gpatch(FT,VT,'w','none',0.25);
 gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-axisGeom; camlight headlight; 
-colormap gjet; icolorbar; 
+axisGeom; axis off; camlight headlight; 
+colormap gjet; %icolorbar; 
 
 subplot(1,2,2); hold on; 
 gpatch(FT_amp,VT_amp,'w','none',0.5);
@@ -475,8 +475,8 @@ cFigure;
 hold on; 
 % gpatch(FT,VT,'w','none',0.25);
 gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-axisGeom; camlight headlight; 
-colormap gjet; icolorbar; 
+axisGeom; axis off; camlight headlight; 
+colormap gjet; %icolorbar; 
 gdrawnow; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -715,9 +715,9 @@ switch select_amputation_case
         %%
         cFigure; hold on;
         gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-        patchNormPlot(FT_amp{1},VT_amp{1});
-        axisGeom; camlight headlight;
-        colormap gjet; icolorbar;
+        %patchNormPlot(FT_amp{1},VT_amp{1});
+        axisGeom; axis off; camlight headlight;
+        colormap gjet; %icolorbar;
         gdrawnow;  
         
         case 'tf'
@@ -875,8 +875,8 @@ switch select_amputation_case
         cFigure; hold on;
         gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
         patchNormPlot(FT_amp,VT_amp);
-        axisGeom; camlight headlight;
-        colormap gjet; icolorbar;
+        axisGeom; axis off; camlight headlight;
+        colormap gjet; %icolorbar;
         gdrawnow;  
 
 %         stlwrite(triangulation(VT_amp{1},FT_amp{1}),fullfile(saveFolder_stl,'femur_tf.stl'),'binary');
@@ -884,48 +884,28 @@ switch select_amputation_case
 %         stlwrite(triangulation(VT_amp{3},FT_amp{3}),fullfile(saveFolder_stl,'muscle_tf.stl'),'binary');
 %         stlwrite(triangulation(VT_amp{4},FT_amp{4}),fullfile(saveFolder_stl,'muscle_lid_tf.stl'),'binary');
 %         stlwrite(triangulation(VT_amp{5},FT_amp{5}),fullfile(saveFolder_stl,'skin_lid_tf.stl'),'binary'); 
-        stlStruct.solidNames={'Femur'};
-        stlStruct.solidVertices={VT_amp{1}};
-        stlStruct.solidFaces={FT_amp{1}};
-        stlStruct.solidNormals={[]};
-        fileName=fullfile(saveFolder_stl,'femur_tf.stl');
-        export_STL_txt(fileName,stlStruct);
-
-        stlStruct.solidNames={'Skin'};
-        stlStruct.solidVertices={VT_amp{2}};
-        stlStruct.solidFaces={FT_amp{2}};
-        stlStruct.solidNormals={[]};
-        fileName=fullfile(saveFolder_stl,'skin_tf.stl');
-        export_STL_txt(fileName,stlStruct);
-
-        stlStruct.solidNames={'Muscle'};
-        stlStruct.solidVertices={VT_amp{3}};
-        stlStruct.solidFaces={FT_amp{3}};
-        stlStruct.solidNormals={[]};
-        fileName=fullfile(saveFolder_stl,'muscle_tf.stl');
-        export_STL_txt(fileName,stlStruct);
-
-        stlStruct.solidNames={'Muscle_lid'};
-        stlStruct.solidVertices={VT_amp{4}};
-        stlStruct.solidFaces={FT_amp{4}};
-        stlStruct.solidNormals={[]};
-        fileName=fullfile(saveFolder_stl,'muscle_lid_tf.stl');
-        export_STL_txt(fileName,stlStruct);
-        
-        stlStruct.solidNames={'Skin_lid'};
-        stlStruct.solidVertices={VT_amp{5}};
-        stlStruct.solidFaces={FT_amp{5}};
-        stlStruct.solidNormals={[]};
-        fileName=fullfile(saveFolder_stl,'skin_lid_tf.stl');
-        export_STL_txt(fileName,stlStruct);
-        
-        
+% 
+%         %% Remesh
+%         optionStructRemesh.pointSpacing=2; %Set desired point spacing
+%         [FT_amp{1},VT_amp{1}]=ggremesh(FT_amp{1},VT_amp{1},optionStructRemesh);
+%         [FT_amp{2},VT_amp{2}]=ggremesh(FT_amp{2},VT_amp{2},optionStructRemesh);
+%         [FT_amp{3},VT_amp{3}]=ggremesh(FT_amp{3},VT_amp{3},optionStructRemesh);
+%         [FT_amp{4},VT_amp{4}]=ggremesh(FT_amp{4},VT_amp{4},optionStructRemesh);
+%         [FT_amp{5},VT_amp{5}]=ggremesh(FT_amp{5},VT_amp{5},optionStructRemesh);
+            
 end
 
 %% Save model
 if saveOn==1
-    saveName_mat=fullfile(saveFolder,[saveNameGeom,'.mat']);
-    save(saveName_mat,'FT_amp','VT_amp','CT_amp');
+    switch select_amputation_case
+        case 'tt'
+            saveName_mat=fullfile(saveFolder,[saveNameGeom_tt,'.mat']);
+            save(saveName_mat,'FT_amp','VT_amp','CT_amp');
+        case 'tf'
+            
+            saveName_mat=fullfile(saveFolder,[saveNameGeom_tf,'.mat']);
+            save(saveName_mat,'FT_amp','VT_amp','CT_amp');
+    end
 end
 
 %%
