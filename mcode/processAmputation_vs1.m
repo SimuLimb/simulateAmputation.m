@@ -9,6 +9,8 @@ clear; close all; clc;
 % This code requires the GIBBON MATLAB toolbox 
 % <www.gibboncode.org>
 
+%colors
+green = 1/255*[0, 100, 0];
 %% Control parameters 
 
 projectFolder = fileparts(fileparts(mfilename('fullpath')));
@@ -145,13 +147,15 @@ end
 %%
 % Visualization
 
-cFigure; hold on; 
-%title('Cut features');
-% gpatch(FT,VT,'w','none',0.1);
-gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-axisGeom; axis off; camlight headlight; 
-colormap gjet; %icolorbar; 
-gdrawnow; 
+% cFigure; hold on; 
+% %title('Cut features');
+% % gpatch(FT,VT,'w','none',0.1);
+% gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
+% gpatch(FT{1},VT{1},'w','none',0.25);
+% plotV(V_bone_femur(I_min_femur,:),'k.','MarkerSize',100);
+% axisGeom; axis off; camlight headlight; 
+% colormap gjet; %icolorbar; 
+% gdrawnow; 
 
 %% Set up skin taper parameterisation
 switch select_amputation_case
@@ -175,14 +179,20 @@ switch select_amputation_case
         %Muscle
         Fm=FT_amp{6};
         Vm=VT_amp{6};     
-end
+        %Get cut bone end curve
+        Ebt=patchBoundary(Ft,Vt);
+        indBt=edgeListToCurve(Ebt);
+        indBt=indBt(1:end-1);
+        P_end_centroid=mean(Vt(indBt,:),1);
 
-        
+end
+  
 %Get cut bone end curve
 Ebt=patchBoundary(Ft,Vt);
 indBt=edgeListToCurve(Ebt);
 indBt=indBt(1:end-1);
 P_end_centroid=mean(Vt(indBt,:),1);
+        
 %Skin
 D=Vs(:,3)-(min(Vs(:,3))+taperHeigth);
 D(D>0)=0;
@@ -191,7 +201,6 @@ D=D./max(D);
 D=D.^2;
         
 [Dp,indMin]=minDist(Vs(:,[1 2]),Vt(indBt,[1 2]));
-
 Dp(Dp<=taperThreshold)=taperThreshold;
 Dp=Dp-min(Dp);
 Dp=Dp./max(Dp);
@@ -215,15 +224,19 @@ switch select_amputation_case
         VT_amp{5}=Vs;
 end
 
+F_skin_ref=FT_amp{2};
+V_skin_ref=VT_amp{2};
 cFigure; hold on;
-title('taper morphing');
-gpatch(FT_amp,VT_amp,'w','none',0.5);
-% gpatch(Fs,Vs,'w','none',0.5);
+%title('taper morphing');
+gpatch(FT_amp{2},VT_amp{2},'w','none',0.5);
+%gpatch(FT_amp,VT_amp,'w','none',0.5);
+
+%gpatch(Fs,Vs,'r','none',0.5);
 quiverVec(Vs1,R);
 colormap gjet; colorbar;
-axisGeom; camlight headlight;
+axisGeom; axis off; camlight headlight;
+set(gca,'FontSize',35);
 gdrawnow;
-
 
 %% Process skin distal end closure
 P_end=P_end_centroid-[0 0 distalExcess];
@@ -234,8 +247,9 @@ Ebs=patchBoundary(Fs,Vs);
 % Visualization 
 
 cFigure; hold on; 
-title('Distal end closure');
-gpatch(FT_amp,VT_amp,'w','none',1);
+%title('Distal end closure');
+%gpatch(FT_amp{2},VT_amp{2},'w','none',0.5);
+gpatch(FT_amp,VT_amp,'w','none',0.5);
 %gpatch(Fs,Vs,'w','none',0.25);
 hp=gpatch(Fsb,Vsb,Vsb(:,3),'none',1); hp.FaceColor='interp';
 % gpatch(Ebs,Vs,'none','b',1,3);
@@ -277,7 +291,6 @@ switch select_amputation_case
         CT_amp{5}=5*ones(size(Fs,1),1);
 end
 
-
 cFigure; 
 subplot(1,2,1); hold on; 
 % gpatch(FT,VT,'w','none',0.25);
@@ -290,6 +303,10 @@ gpatch(FT_amp,VT_amp,'w','k',1);
 axisGeom; axis off; camlight headlight; 
 gdrawnow; 
 
+% cFigure; hold on; 
+% gpatch(FT_amp{2},VT_amp{2},'w','k',1);
+% axisGeom; axis off; camlight headlight; 
+% gdrawnow; 
 
 %% Process muscle taper
 Dm=Vm(:,3)-(min(Vm(:,3))+taperHeigth);
@@ -324,11 +341,13 @@ switch select_amputation_case
 end
 
 cFigure; hold on;
-title('taper morphing');
+%title('taper morphing');
+%gpatch(FT_amp{3},VT_amp{3},'w','none',0.5);
 gpatch(FT_amp,VT_amp,'w','none',0.5);
 quiverVec(Vm1,Rm);
 colormap gjet; colorbar;
-axisGeom; camlight headlight;
+axisGeom; axis off; camlight headlight;
+set(gca,'FontSize',35);
 gdrawnow;
 
 %% Process muscle distal end closure
@@ -338,9 +357,10 @@ Ebm=patchBoundary(Fm,Vm);
 %%
 % Visualization 
 cFigure; hold on; 
-title('Distal end closure');
+%title('Distal end closure');
+%gpatch(FT_amp{3},VT_amp{3},'w','none',0.25);
 gpatch(FT_amp,VT_amp,'w','none',0.25);
-gpatch(Fm,Vm,'w','none',1);
+gpatch(Fm,Vm,'w','none',0.5);
 hp=gpatch(Fmb,Vmb,Vmb(:,3),'none',1); hp.FaceColor='interp';
 
 quiverVec(Vm(indBm,:),Nd(indBm,:),radiusEnd/4,'k');
@@ -353,7 +373,7 @@ for q=1:size(XB,2)
 end
 
 plotV(P_end,'k.','MarkerSize',25);
-
+axis off;
 axisGeom; camlight headlight; 
 gdrawnow; 
 
@@ -393,6 +413,14 @@ gpatch(FT_amp,VT_amp,'w','k',0.5);
 axisGeom; axis off; camlight headlight; 
 gdrawnow; 
 
+% 
+% %
+% cFigure; hold on; 
+% gpatch(FT_amp{3},VT_amp{3},'w','k',1);
+% axisGeom; axis off; camlight headlight; 
+% gdrawnow; 
+
+
 %% Process femur taper
 switch select_amputation_case
     case 'tf'
@@ -417,7 +445,7 @@ P_end=P_mid-[0 0 radiusEnd];
 %%
 % Visualization
 cFigure; hold on; 
-gpatch(Ft,Vt,'w','none',0.25);
+gpatch(Ft,Vt,'w','none',0.5);
 gpatch(Ebs,Vt,'none','b',1,3);
 hp=gpatch(Fsb,Vsb,'w','k',1,1); 
 % hp.FaceColor='interp';
@@ -431,7 +459,7 @@ plotV(P3,'b.-','MarkerSize',15,'LineWidth',2);
 for q=1:size(XB,2)
     plotV([XB(:,q) YB(:,q) ZB(:,q)],'k.-','LineWidth',0.5,'MarkerSize',5);
 end
-
+axis off;
 axisGeom; camlight headlight; 
 gdrawnow; 
 
@@ -458,6 +486,12 @@ end
 
 %%
 
+% cFigure;hold on; 
+% gpatch(Ft,Vt,'w','k',1);
+% axisGeom; axis off; camlight headlight; 
+% gdrawnow; 
+
+
 cFigure; 
 subplot(1,2,1); hold on; 
 % gpatch(FT,VT,'w','none',0.25);
@@ -476,7 +510,8 @@ hold on;
 % gpatch(FT,VT,'w','none',0.25);
 gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
 axisGeom; axis off; camlight headlight; 
-colormap gjet; %icolorbar; 
+colormap gjet; icolorbar; 
+set(gca,'FontSize',35);
 gdrawnow; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -807,6 +842,9 @@ switch select_amputation_case
         colormap gjet; icolorbar;
         gdrawnow;  
        
+        %Save original skin surface for socket design
+        F_skin_original=FT_amp{2};
+        V_skin_original=VT_amp{2};
         %Cut the top skin surface
         Fs=FT_amp{2};
         Vs=VT_amp{2};
@@ -851,14 +889,19 @@ switch select_amputation_case
         
         %%
         cFigure;hold on;
-        gpatch(Fc_skin,Vc_skin,'gw','k',1);
-        gpatch(Fc_muscle,Vc_muscle,'rw','k',1);
-        gpatch(Fsm,Vsm,'bw','k',0.6);
-        plotV(Vc_skin(indBs_skin,:),'r-','LineWidth',4);
-        plotV(Vc_muscle(indBs_muscle,:),'g-','LineWidth',4);
+        gpatch(Fc_skin,Vc_skin,green,'none',0.5);
+        gpatch(Fc_muscle,Vc_muscle,'rw','none',0.5);
+        gpatch(Fsm,Vsm,'w','k',0.6);
+        gpatch(Ftt,Vtt,'w','k',0.6);
+
+        
+        plotV(Vc_skin(indBs_skin,:),'k-','LineWidth',4);
+        plotV(Vc_muscle(indBs_muscle,:),'r-','LineWidth',4);
+        plotV(Vc_femur(indBs_femur,:),'b-','LineWidth',4);
+
 
         colormap gjet;
-        axisGeom; camlight headlight;
+        axisGeom; axis off;camlight headlight;
         gdrawnow;
 
         
@@ -874,11 +917,17 @@ switch select_amputation_case
         %%
         cFigure; hold on;
         gpatch(FT_amp,VT_amp,CT_amp,'none',0.5);
-        patchNormPlot(FT_amp,VT_amp);
+        %patchNormPlot(FT_amp,VT_amp);
         axisGeom; axis off; camlight headlight;
-        colormap gjet; %icolorbar;
+        colormap gjet; icolorbar;
         gdrawnow;  
+        
 
+       
+        FT_amp{6}=F_skin_original;
+        VT_amp{6}=V_skin_original;
+        CT_amp{6}=6*ones(size(F_skin_original,1),1);
+        
 %         stlwrite(triangulation(VT_amp{1},FT_amp{1}),fullfile(saveFolder_stl,'femur_tf.stl'),'binary');
 %         stlwrite(triangulation(VT_amp{2},FT_amp{2}),fullfile(saveFolder_stl,'skin_tf.stl'),'binary');
 %         stlwrite(triangulation(VT_amp{3},FT_amp{3}),fullfile(saveFolder_stl,'muscle_tf.stl'),'binary');
