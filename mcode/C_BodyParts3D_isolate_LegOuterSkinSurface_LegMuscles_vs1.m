@@ -27,11 +27,12 @@ saveNameMesh1='right_leg_muscles';
 
 pointSpacing=4; 
 cutHeight=810;
+cutHeight1=860;
 saveOn=1;
 
 
-Select_layer='outer_muscles_surface';%'outer_skin_surface';'outer_muscles_surface'
-switch Select_layer
+Select_layer='outer_skin_surface';%'outer_skin_surface';'outer_muscles_surface'
+switch Select_layer  
     case 'outer_skin_surface'
         %% Original
         fileName_mat=fullfile(loadFolder,[fileName_FMA,'.mat']);
@@ -54,6 +55,7 @@ switch Select_layer
         axisGeom;
         camlight headlight;
         drawnow;
+        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %% Cut again preserving only right leg
         optionStruct.outputType='label';
@@ -62,14 +64,14 @@ switch Select_layer
         logicKeep=G==indMax;
         Fs=Fs(logicKeep,:);
         [Fs,Vs]=patchCleanUnused(Fs,Vs);
-        
+
         cFigure; hold on;
         gpatch(Fs,Vs,'w','none',0.25);
         axis off;
         axisGeom;
         camlight headlight;
         drawnow;
-        
+
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %% Slice the surface of the right leg at cutHeight
         %% to detect all edges to form the list of curves within the slice
@@ -100,12 +102,13 @@ switch Select_layer
         VTc=Vc(indCurveNow,:);
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         %% Forming the 2D convex hull around the curve
-        [V_slice_curve]=convexhull_curve(VTc,200);
+        [VT0]=convexhull_curve(VTc,200);
         [Fc,Vc]=patchCleanUnused(Fc(logicSide,:),Vc);
         
+        VT0(:,3)=VT0(:,3)+25;
         cFigure; hold on;        
         gpatch(Fc,Vc,'w','none',0.25);
-        plotV(V_slice_curve,'k-','LineWidth',4);
+        plotV(VT0,'k-','LineWidth',4);
         axis off;
         axisGeom;
         camlight headlight;
@@ -116,8 +119,8 @@ switch Select_layer
         %Set-up orientation and location of cutting plane
         snapTolerance=mean(patchEdgeLengths(Fc,Vc))/100; %Tolerance for surface slicing
         n=vecnormalize([0 0 1]); %Normal direction to plane
-        Q1=euler2DCM([0.4*pi 0 0.8*pi]);
-
+        Q1=euler2DCM([0.38*pi 0 0.8*pi]);
+        
         n=n*Q1;
         P_cut=[0 0 0]+n*306; %Point on plane
         %Slicing surface
@@ -125,24 +128,90 @@ switch Select_layer
         %Compose isolated cut geometry and boundary curves
         [Fe,Ve]=patchCleanUnused(Fd(logicSide==1,:),Vd);
 
-            
+        Ebs=patchBoundary(Fe);
+        groupStruct.outputType='label';
+        [G,~,groupSize]=tesgroup(Ebs,groupStruct);
+
+        logicKeep=G==1;
+        Eb_keep=Ebs(logicKeep,:);
+        indCutLine=edgeListToCurve(Eb_keep);
+        
+        %Smoothen line
+        logicRigid=true(size(Ve,1),1);
+        logicRigid(indCutLine)=0;
+        
+        cPar.n=10;
+        cPar.Method='LAP';
+        cPar.RigidConstraints=find(logicRigid);
+        [Ve]=patchSmooth(Ebs,Ve,[],cPar);
+        
+        %Smoothen mesh
+        logicTouch=any(ismember(Fe,indCutLine),2);
+        indTouch=unique(Fe(logicTouch,:));
+        
+        for q=1:1:2
+            logicTouch=any(ismember(Fe,indTouch),2);
+            indTouch=unique(Fe(logicTouch,:));
+        end
+        %Smoothen line
+        logicRigid=true(size(Ve,1),1);
+        logicRigid(indTouch)=0;
+        logicRigid(indCutLine)=1;
+        %Smoothen mesh
+        clear cPar;
+        cPar.n=100;
+        cPar.Method='HC';
+        cPar.RigidConstraints=find(logicRigid);
+        [Ve]=patchSmooth(Fe,Ve,[],cPar);
+
+        VT=Ve(indCutLine,:);
+
+        VT0=evenlySampleCurve(VT0,size(VT,1),'pchip',1);
+        VT0=VT0(1:end-1,:);
+        indCurve_S=(linspace(1,size(VT0,1),size(VT0,1)));
+        indCurve_S=indCurve_S(1:end-1);
+        indCurve_L=indCurve_S;
+        %% Reorder curves
+        [~,indMin]=minDist(VT(indCurve_L(1),:),VT0(indCurve_S,:));
+        
+        if indMin>1
+            indCurve_S=[indCurve_S(indMin:end) indCurve_S(1:indMin-1)];
+        end
+        
+        D1=sum(sqrt(sum((VT(indCurve_L,:)-VT0(indCurve_S,:)).^2,2)));
+        D2=sum(sqrt(sum((VT(indCurve_L,:)-VT0(flip(indCurve_S),:)).^2,2)));
+        
+        if D2<D1
+            indCurve_S=flip(indCurve_S);
+        end
+
+        cPar.closeLoopOpt=1;
+        cPar.patchType='tri_slash';
+        [Fn1,Vn1]=polyLoftLinear(VT(indCurve_L,:),VT0(indCurve_S,:),cPar);
+
+        %Smoothen mesh
+        clear cPar;
+        cPar.n=100;
+        cPar.Method='HC';
+        [Vn1]=patchSmooth(Fn1,Vn1,[],cPar);
+        
+        [Fk,Vk]=regionTriMesh3D({VT0(indCurve_S,:)},pointSpacing,0,'natural');
+        
         cFigure; hold on;        
-        gpatch(F,V,'w','none',0.25);
-        gpatch(Fe,Ve,'rw','none',1);
-        plotV(V_slice_curve,'k-','LineWidth',4);
+
+        plotV(VT,'g.-','MarkerSize',25,'LineWidth',3);
+        plotV(VT0,'g.-','MarkerSize',25,'LineWidth',3);
+        gpatch(Fe,Ve,'gw','none',1);
+        gpatch(Fn1,Vn1,'w','none',1);
+        gpatch(Fk,Vk,'w','none',1);
         axis off;
         axisGeom;
         camlight headlight;
         drawnow;
-        
-        %% Forming the point cloud out of the processed cut right leg a
-        %% and the edge of the skin (curve) formed at cutHeight
-        Ve=[Ve;V_slice_curve;];    
-        %% Construct alpha shape
-        % This deteriorates surface quality (bridges concave regions) but is a
-        % termporary "quick-and-dirty" work-around to obtain outer skin surface
-        % only.
-        shp = alphaShape(Ve,max(patchEdgeLengths(Fe,Ve)),'HoleThreshold',500,'RegionThreshold',100);
+
+
+        V_total=[Ve;Vn1;Vk]; 
+        shp = alphaShape(V_total,max(patchEdgeLengths(Fe,Ve)));%,'HoleThreshold',500,'RegionThreshold',100);
         [Fa,Va] = boundaryFacets(shp); %Get boundary faces of alpha shape
         [Fa,Va] = patchCleanUnused(Fa,Va); %Remove unused vertices
         
@@ -154,18 +223,18 @@ switch Select_layer
         %% Visualisation       
         cFigure;
         hAxis(1)=subplot(1,2,1); hold on;
-        %gpatch(Fs,Vs,'w','none',0.25);
-        gpatch(Fe,Ve,'w','none',1);
-        plotV(V_slice_curve,'k-','LineWidth',4);
+        gpatch(Fs,Vs,'w','none',0.25);
+        %gpatch(Fe,Ve,'w','none',1);
+        %plotV(VT0,'k-','LineWidth',4);
 
-        text(min(V(:,1))+50,min(V(:,2))+99,'A','FontSize',fontSize);
+        %text(min(V(:,1))+50,min(V(:,2))+99,'A','FontSize',fontSize);
         axis off;
         axisGeom;
         camlight headlight;
         
         hAxis(2)=subplot(1,2,2); hold on;
         gpatch(Fn,Vn,'w','k',1,lineWidth);
-        text(min(V(:,1))+40,min(V(:,2))+110,'B','FontSize',fontSize);
+        %text(min(V(:,1))+40,min(V(:,2))+110,'B','FontSize',fontSize);
         axis off;
         axisGeom;
         pos = get( hAxis(2), 'Position' );
@@ -173,7 +242,7 @@ switch Select_layer
         set( hAxis(2), 'Position', pos ) ;
         camlight headlight;
         gdrawnow;
-        
+
         %% Store model in structure
         modelNew.source=fileName_FMA;
         modelNew.faces=Fn;
