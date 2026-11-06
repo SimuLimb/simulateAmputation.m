@@ -2,7 +2,7 @@
 Code to simulate amputation in terms of surface geometry creation for socket design based on finite element analysis.
 
 <div>
-    <img src="docs/img/simulateAmputation.jpg" width="40%">
+    <img src="docs/img/simulateAmputation.jpg" width="100%">
 </div>
 
 ## Dependencies
